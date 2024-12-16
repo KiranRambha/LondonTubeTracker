@@ -18,14 +18,14 @@ def get_time_without_seconds(dt_str):
     dt = datetime.strptime(dt_str, '%Y-%m-%dT%H:%M:%SZ')
     return dt.strftime('%H:%M')
 
+def format_time_to_station(seconds, expectedArrival):
+    if seconds < 60:
+        return "Due"
+    else:
+        return get_time_without_seconds(expectedArrival)
+
 def filter_arrivals_by_platform(stationId, platformName):
     arrivals = get_station_arrivals(stationId)
-
-    def format_time_to_station(seconds, expectedArrival):
-        if seconds < 60:
-            return "Due"
-        else:
-            return get_time_without_seconds(expectedArrival)
 
     filtered_arrivals = [
         {**arrival, 'timeToStation': format_time_to_station(arrival['timeToStation'], arrival['expectedArrival'])}
@@ -83,13 +83,6 @@ def get_arrivals_by_line_simplified(station_id, line_ids):
     # Fetching all arrivals at the given station
     arrivals = get_station_arrivals(station_id)
 
-    # Helper function to convert time to a user-friendly format
-    def format_time_to_station(seconds):
-        if seconds < 60:
-            return "Due"
-        else:
-            return f"{seconds // 60} mins"
-
     # Dictionary to store the formatted and sorted results by line ID
     results = {}
 
@@ -97,7 +90,7 @@ def get_arrivals_by_line_simplified(station_id, line_ids):
     for line_id in line_ids:
         # Formatting and filtering arrivals by line ID
         line_arrivals = [
-            (arrival['timeToStation'], format_time_to_station(arrival['timeToStation']))
+            (arrival['timeToStation'], format_time_to_station(arrival['timeToStation'], arrival['expectedArrival']))
             for arrival in arrivals if 'lineId' in arrival and arrival['lineId'] == line_id
         ]
 

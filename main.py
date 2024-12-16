@@ -1,17 +1,23 @@
 import sys
 import os
-libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'lib')
+from pathlib import Path
+libdir = str(Path(__file__).resolve().parent / 'lib')
 if os.path.exists(libdir):
     sys.path.append(libdir)
 
 from waveshare_epd import epd7in5_V2
 from PIL import Image, ImageDraw, ImageFont
+from manage_refresh import get_refresh_count, set_refresh_count
 from tfl import get_arrivals_and_latest_location, get_arrivals_and_destination, fetch_bus_arrivals_concurrently
 from datetime import datetime, timedelta
+
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 font_path = os.path.join(picdir, 'DejaVuSans-Bold.ttf')
 
-DEBUG = True
+DEBUG = False
+
+# Initialize the E-Ink display (update to match your model)
+epd = epd7in5_V2.EPD()
 
 # 0 = black, 255 = white
 background_color = 255
@@ -67,9 +73,13 @@ current_time = now.strftime("%H:%M")
 time_plus_five_minutes = now + timedelta(minutes=5)
 current_time_plus_five = time_plus_five_minutes.strftime("%H:%M")
 
+count = get_refresh_count()
+
+if DEBUG:
+  count = 0
+
 # Section: Weather & Pollution
-draw.text((10, 10), "London Underground Arrivals", font=font_large, fill=font_color)
-print(current_date)
+draw.text((10, 10), "London Underground & Bus", font=font_large, fill=font_color)
 draw.text((570, 20), f"{current_date}", font=font_small, fill=font_color)
 
 
@@ -113,16 +123,25 @@ draw.text((10, 450), f"Last Update: {current_time}", font=font_small, fill=font_
 # Footer: Date and Time
 draw.text((590, 450), f"Next Update: {current_time_plus_five}", font=font_small, fill=font_color)
 
-if DEBUG:
-    # Save the image
-    image.save("output.bmp")
+if count == 0:
+  if DEBUG:
+      # Save the image
+      image.save("output.bmp")
+  else:
+      print("Initializing and clearing the display")
+      epd.init()
+      epd.Clear()
+      epd.display(epd.getbuffer(image))
+      epd.sleep()
+
+      count += 1
+      set_refresh_count(count)
 else:
-    # Initialize the E-Ink display (update to match your model)
-    epd = epd7in5_V2.EPD()
-    print("Initializing and clearing the display")
-    epd.init()
-    epd.Clear()
-    epd.display(epd.getbuffer(image))
-    epd.sleep()
+  epd.init_part()
+  draw.rectangle((5, 90, 600, 140), fill = background_color)
+  draw.text((10, 95), "Stratford - " + str(kingsburyLatestArrivals['arrival_times']), font=font_small, fill=font_color)
+  draw.text((10, 120), "Current Location - " + str(kingsburyLatestArrivals['current_location']), font=font_small, fill=font_color)
+  epd.display_Partial(epd.getbuffer(image), 0, 0, WIDTH, HEIGHT)
+  set_refresh_count(0)
 
 print("Schedule displayed successfully!")
