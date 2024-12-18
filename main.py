@@ -78,7 +78,7 @@ def full_refresh_api_calls():
   }
 
 def partial_refresh_api_call():
-  kingsburyLatestArrivals = get_arrivals_and_latest_location(kingsbury_station_id, kingsbury_platform_name)
+  return get_arrivals_and_latest_location(kingsbury_station_id, kingsbury_platform_name)
 
 def generate_image():
   result = full_refresh_api_calls()
@@ -94,8 +94,8 @@ def generate_image():
   current_time = now.strftime("%H:%M")
 
   # Add 5 minutes to the current time
-  time_plus_five_minutes = now + timedelta(minutes=5)
-  current_time_plus_five = time_plus_five_minutes.strftime("%H:%M")
+  time_plus_x_minutes = now + timedelta(minutes=6)
+  current_time_plus_five = time_plus_x_minutes.strftime("%H:%M")
 
   image = Image.new("1", (WIDTH, HEIGHT), background_color)  # 1-bit monochrome image
   draw = ImageDraw.Draw(image)
@@ -163,13 +163,14 @@ if count == 0:
       count += 1
       set_refresh_count(count)
 else:
-  partial_refresh_api_call()
+  kingsburyLatestArrivals = partial_refresh_api_call()
   epd.init_part()
   reuse_image = Image.open("output.png")
   reused_draw = ImageDraw.Draw(reuse_image)
   reused_draw.rectangle((5, 90, 600, 140), fill = background_color)
   reused_draw.text((10, 95), "Stratford - " + str(kingsburyLatestArrivals['arrival_times']), font=font_small, fill=font_color)
   reused_draw.text((10, 120), "Current Location - " + str(kingsburyLatestArrivals['current_location']), font=font_small, fill=font_color)
+  reuse_image.save("output.png")
   epd.display_Partial(epd.getbuffer(reuse_image), 0, 0, WIDTH, HEIGHT)
   set_refresh_count(0)
 
