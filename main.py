@@ -161,7 +161,7 @@ if count == 0:
       # Cache Image
       latest_image.save("output.png")
       count += 1
-      set_refresh_count(count)
+      set_refresh_count(0)
 else:
   kingsburyLatestArrivals = partial_refresh_api_call()
   epd.init_part()
