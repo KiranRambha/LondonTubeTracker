@@ -1,12 +1,11 @@
 import sys
 import os
 from pathlib import Path
-from waveshare_epd import epd7in5_V2
-
-# Set up the library path (adjust if necessary)
 libdir = str(Path(__file__).resolve().parent / 'lib')
 if os.path.exists(libdir):
     sys.path.append(libdir)
+    
+from waveshare_epd import epd7in5_V2
 
 # Initialize the E-Ink display (update to match your model)
 epd = epd7in5_V2.EPD()
