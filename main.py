@@ -15,6 +15,8 @@ font_path = './fonts/dejavu-sans-bold.ttf'
 
 if DEBUG == False:
   from waveshare_epd import epd7in5_V2
+  picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
+  font_path = os.path.join(picdir, 'DejaVuSans-Bold.ttf')
   epd = epd7in5_V2.EPD()
 
 # 0 = black, 255 = white
