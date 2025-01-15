@@ -5,19 +5,17 @@ libdir = str(Path(__file__).resolve().parent / 'lib')
 if os.path.exists(libdir):
     sys.path.append(libdir)
 
-from waveshare_epd import epd7in5_V2
 from PIL import Image, ImageDraw, ImageFont
 from manage_refresh import get_refresh_count, set_refresh_count
 from tfl import get_arrivals_and_latest_location, get_arrivals_and_destination, fetch_bus_arrivals_concurrently
 from datetime import datetime, timedelta
 
-picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
-font_path = os.path.join(picdir, 'DejaVuSans-Bold.ttf')
-
 DEBUG = False
+font_path = './fonts/dejavu-sans-bold.ttf'
 
-# Initialize the E-Ink display (update to match your model)
-epd = epd7in5_V2.EPD()
+if DEBUG == False:
+  from waveshare_epd import epd7in5_V2
+  epd = epd7in5_V2.EPD()
 
 # 0 = black, 255 = white
 background_color = 255
@@ -52,7 +50,7 @@ font_medium = ImageFont.truetype(font_path, 24)
 font_small = ImageFont.truetype(font_path, 18)
 
 # Create an empty image
-WIDTH, HEIGHT = 800, 480  # Resolution for 7.5" E-Ink display
+WIDTH, HEIGHT = 800, 480
 count = get_refresh_count()
 
 if DEBUG:
@@ -94,14 +92,18 @@ def generate_image():
   current_time = now.strftime("%H:%M")
 
   # Add 5 minutes to the current time
-  time_plus_x_minutes = now + timedelta(minutes=6)
+  time_plus_x_minutes = now + timedelta(minutes=5)
   current_time_plus_five = time_plus_x_minutes.strftime("%H:%M")
 
   image = Image.new("1", (WIDTH, HEIGHT), background_color)  # 1-bit monochrome image
   draw = ImageDraw.Draw(image)
   # Section: Weather & Pollution
   draw.text((10, 10), "London Underground & Bus", font=font_large, fill=font_color)
-  draw.text((530, 20), f"{current_date}", font=font_small, fill=font_color)
+
+  bbox = draw.textbbox((0, 0), current_date, font=font_small)
+  current_date_width = bbox[2] - bbox[0]
+  current_date_position = WIDTH - current_date_width - 10
+  draw.text((current_date_position, 20), f"{current_date}", font=font_small, fill=font_color)
 
 
   # Divider
@@ -152,8 +154,10 @@ if count == 0:
   else:
       print("Initializing Display")
       epd.init()
+      print("Display Initialized")
       print("Clear Display")
       epd.Clear()
+      print("Display Cleared")
       latest_image = generate_image()
       epd.display(epd.getbuffer(latest_image))
       epd.sleep()
@@ -174,4 +178,4 @@ else:
   epd.display_Partial(epd.getbuffer(reuse_image), 0, 0, WIDTH, HEIGHT)
   set_refresh_count(0)
 
-print("Schedule displayed successfully!")
+print("Display Updated Successfully!")

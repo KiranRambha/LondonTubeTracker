@@ -21,4 +21,4 @@ def clear_display():
 # Call the clear_display function to clear the screen and consume less power
 clear_display()
 
-print("Display cleared successfully and power saved.")
+print("Successfully cleared and powered off.")
