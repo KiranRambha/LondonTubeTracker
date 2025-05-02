@@ -1,6 +1,6 @@
 import concurrent.futures
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # Helper functions
 def get_station_arrivals(station_id):
@@ -18,8 +18,19 @@ def format_time_to_station(seconds, expected_arrival):
     """Format time to station into a readable format."""
     if seconds < 60:
         return "Due"
-    dt = datetime.strptime(expected_arrival, '%Y-%m-%dT%H:%M:%SZ')
-    return dt.strftime('%H:%M')
+    
+    # Parse UTC time
+    utc_time = datetime.strptime(expected_arrival, '%Y-%m-%dT%H:%M:%SZ')
+    utc_time = utc_time.replace(tzinfo=timezone.utc)
+    
+    # Get current time to determine if we're in BST (March to October)
+    now = datetime.now(timezone.utc)
+    is_bst = now.month in range(3, 11) or (now.month == 3 and now.day >= 25) or (now.month == 10 and now.day <= 25)
+    
+    # Convert to London time (UTC+0 or UTC+1)
+    london_time = utc_time + timedelta(hours=1 if is_bst else 0)
+    
+    return london_time.strftime('%H:%M')
 
 def group_arrivals_by_platform(arrivals, platform_name):
     """Filter and sort arrivals by platform."""

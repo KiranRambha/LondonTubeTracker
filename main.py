@@ -123,8 +123,10 @@ def generate_image():
   # Section: Jubilee Southbound Arrivals
   draw.text((10, 155), "Metropolitan Southbound Arrivals - Wembley Park", font=font_medium, fill=font_color)
 
-  draw.text((10, 190), str(wembleyLatestArrivals[0]['destination']) + " - " + str(wembleyLatestArrivals[0]['arrival_times']), font=font_small, fill=font_color)
-  draw.text((10, 215), str(wembleyLatestArrivals[1]['destination']) + " - " + str(wembleyLatestArrivals[1]['arrival_times']), font=font_small, fill=font_color)
+  if (len(wembleyLatestArrivals) > 0):
+    draw.text((10, 190), str(wembleyLatestArrivals[0]['destination']) + " - " + str(wembleyLatestArrivals[0]['arrival_times']), font=font_small, fill=font_color)
+  if (len(wembleyLatestArrivals) > 1):
+    draw.text((10, 215), str(wembleyLatestArrivals[1]['destination']) + " - " + str(wembleyLatestArrivals[1]['arrival_times']), font=font_small, fill=font_color)
   if (len(wembleyLatestArrivals) > 2):
     draw.text((10, 240), str(wembleyLatestArrivals[2]['destination']) + " - " + str(wembleyLatestArrivals[2]['arrival_times']), font=font_small, fill=font_color)
 
